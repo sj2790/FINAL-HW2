@@ -1,0 +1,6 @@
+Below I am providing you with the URLs beginning with http://localhost:8000/ 
+These URLs make the browser execute the alert message box "hello" as we doing a xss attack.
+You can find additional information on attack and its prevention in the bugs.txt file
+
+http://localhost:8000/buy.html?director=<script>alert("hello")</script>
+http://localhost:8000/gift.html?director=<script>alert("hello")</script>
