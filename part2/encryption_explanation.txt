@@ -1,0 +1,18 @@
+Part 2
+Encryption Implementation
+For the encryption implementation, after properly implementing django’s djfernet library, I used the “EncryptedTextField()” function in the models.py file. More specifically, in line 45 of the models.py file, I added the following line: data = EncryptedTextField(). Using this, the card data in the database gets encrypted using this code line, and no users will be able to view or access it directly. I also just commented out the whole line of the binary field in order to give me the gift card with visibility. More specifically, this is the commented line: “data=models/BinaryField(unique.true)”. So when I use this function EncryptedTextField(), this will just encrypt the gift card so no other user will be able to see the gift card. Please note that I also added the following lines at the top of the models.py file where we are importing the needed libraries:
+from django.db import models
+from fernet_fields import *
+# --ADDED ADDITIONAL LIBRARY
+Key management 
+Upon looking for the secret key, I spotted a line in settings.py file where it was shown in plain text. This is a very obvious vulnerability because literally anyone who can access this file can directly and clearly see the key in plain text. During our class lab, we saw how to store secret_key in an environment file. I created the environment file as .env then took the SECRET_KEY line from setting.py and pasted it to the .env file. I implemented the key's environmental configuration using Python's decoupled module because it is more secure for cross-accessing and will not get referred to.
+In lines 27 in the settings.py file, I added the following code:
+load_dotenv() 
+SECRET_KEY = config('SECRET_KEY')
+So, in settings.py, I imported the “config” component of the “Decouple” module. This is used to read the secret key from the env file like: SECRET_KEY = config('SECRET_KEY')
+I chose this method for two main reasons:
+It decouples the code from the settings which is more secure
+Storing it in a .env file ensures that this file does not show up on the Github repository for everyone to see if it is added to the .gitignore
+To summarize this part, for the key management, I went to the settings.py file where there is a secret key written down directly which is not hardcoded. I just used the Django environment variable. And I created my environment, a virtual environment. And I use this key in a store file. So I just created an environment variable, and created the environment file, and entered the key there. I also made sure that whenever I am running this make legacy site, I am running into my environment. So I created my virtual environment using django and I enter the key inside of this file and I run it. 
+GitHub Actions & Testing
+In regards to GitHub Actions, I installed the librariesin the virtual environment as shown in class, upgraded pip, installed django, requests and virtualenv, djfernet, cryptography: so basically all the libraries which we are using. And yes, I just then run the normal commands that we need to write in order to run the server. Note: I always made sure that I enter “test” instead of run server so that the GitHub Actions environment file is made in order to test the test cases.
