@@ -111,6 +111,9 @@ def buy_card_view(request, prod_num=0):
     else:
         return redirect("/buy/1")
 
+# --ADDING DECORATOR--
+@csrf_protect
+
 # KG: What stops an attacker from making me buy a card for him?
 def gift_card_view(request, prod_num=0):
     context = {"prod_num" : prod_num}
@@ -146,9 +149,9 @@ def gift_card_view(request, prod_num=0):
             prod_num = 1
         # Get vars from either post or get
         user = request.POST.get('username', None) \
-            if request.method == "POST" else request.GET.get('username', None)
+            # if request.method == "POST" else request.GET.get('username', None)
         amount = request.POST.get('amount', None) \
-            if request.method == "POST" else request.GET.get('amount', None)
+            # if request.method == "POST" else request.GET.get('amount', None)
         if user is None:
             return HttpResponse("ERROR 404")
         try:
@@ -199,7 +202,7 @@ def use_card_view(request):
         # Need to write this to parse card type.
         card_file_data = request.FILES['card_data']
         card_fname = request.POST.get('card_fname', None)
-        if card_fname is None or card_fname == '':
+        if card_fname is None or card_fname == '':  # or not card_fname.isalnum():
             card_file_path = os.path.join(tempfile.gettempdir(), f'newcard_{request.user.id}_parser.gftcrd')
         else:
             card_file_path = os.path.join(tempfile.gettempdir(), f'{card_fname}_{request.user.id}_parser.gftcrd')
@@ -207,10 +210,19 @@ def use_card_view(request):
         # check if we know about card.
         # KG: Where is this data coming from? RAW SQL usage with unkown
         # KG: data seems dangerous.
+        
+        # --ADDED TRY-EXCEPT TO MITIGATE COMMAND INJECTION
+        # signature = ""
+        # try:                  
+        #     signature = json.loads(card_data)['records'][0]['signature']
+        #     raise "error"
+        # except:
+        #     pass
         print(card_data.strip())
         signature = json.loads(card_data)['records'][0]['signature']
         # signatures should be pretty unique, right?
-        card_query = Card.objects.raw('select id from LegacySite_card where data LIKE \'%%%s%%\'' % signature)
+        # card_query = Card.objects.raw('select id from LegacySite_card where data LIKE \'%%%s%%\'' % signature)
+        card_query = Card.objects.raw('select id from LegacySite_card where data = %s', [signature]) # --ADDED [] BRACKETS TO CHECK THE INPUT FOR SQL MITIGATION
         user_cards = Card.objects.raw('select id, count(*) as count from LegacySite_card where LegacySite_card.user_id = %s' % str(request.user.id))
         card_query_string = ""
         print("Found %s cards" % len(card_query))
